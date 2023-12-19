@@ -12,4 +12,8 @@
         - Trailer
         - Title and description
     - Movie Suggestions
+
+- Netflix GPT
+    - search bar
+    - movie suggestions
      
