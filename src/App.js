@@ -1,10 +1,12 @@
+import { Provider } from 'react-redux';
 import './App.css';
-
+import Body from './components/Body';
+import store from './utils/store';
 function App() {
   return (
-    <div >
-      <h1 className="text-lgl font-bold rounded-3xl text-center ">Hello world !! </h1>
-    </div>
+    <Provider store={store}>
+      <Body/>
+    </Provider>
   );
 }
 

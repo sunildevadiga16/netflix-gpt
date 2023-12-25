@@ -1,0 +1,105 @@
+import React, { useState, useRef } from 'react'
+import Header from './Header'
+import { validateFields } from '../utils/validate';
+import { createUserWithEmailAndPassword , signInWithEmailAndPassword, updateProfile} from "firebase/auth";
+import { auth } from '../utils/firebase'
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { addUser } from '../utils/userSlice';
+
+const Login = () => {
+  const [isSignInForm, setIsSignInFrom] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const navigate = useNavigate();
+  const name = useRef(null);
+  const email = useRef(null);
+  const password = useRef(null);
+
+  const dispatch = useDispatch();
+
+  const toggleSignInForm = () => {
+    setIsSignInFrom(!isSignInForm);
+  }
+
+  const handleSignIn = () => {
+    const message = validateFields(email.current.value, password.current.value);
+    setErrorMessage(message);
+    if (message) return;
+
+    if (!isSignInForm) {
+      //Sign up logic
+      createUserWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+          // Signed up 
+          const user = userCredential.user;
+          console.log(user);
+          updateProfile(user, {
+            displayName: name.current.value, photoURL: "https://wallpapers.com/images/high/netflix-profile-pictures-1000-x-1000-qo9h82134t9nv0j0.webp"
+          }).then(() => {
+            // Profile updated!
+          const { uid, email, displayName, photoURL } = auth.currentUser;
+          dispatch(addUser({ uid: uid, email: email, displayName: displayName, photoURL: photoURL }));
+            navigate('/browse');
+          }).catch((error) => {
+            // An error occurred
+            // ...
+            setErrorMessage(error.message)
+          });
+         
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorMessage)
+          // ..
+        });
+    }
+
+    else {
+      //Sign in logic
+      signInWithEmailAndPassword(auth, email.current.value, password.current.value)
+        .then((userCredential) => {
+
+          // Signed in 
+          const user = userCredential.user;
+          console.log("sign in ", user);
+          navigate('/browse');
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          console.log("errorMessage ", errorMessage);
+          setErrorMessage(errorMessage)
+        });
+    }
+  }
+
+  return (
+    <div>
+      <Header />
+      <div>
+        <img className="absolute h-screen w-screen" src="https://assets.nflxext.com/ffe/siteui/vlv3/563192ea-ac0e-4906-a865-ba9899ffafad/6b2842d1-2339-4f08-84f6-148e9fcbe01b/IN-en-20231218-popsignuptwoweeks-perspective_alpha_website_medium.jpg" />
+      </div>
+
+
+      <form onSubmit={(event) => event.preventDefault()} className='absolute p-8 bg-black bg-opacity-60 rounded-lg border-2 right-0 left-0 top-1/4  w-1/5 mx-auto'>
+        <h1 className='font-bold text-3xl py-2 text-white'>{isSignInForm ? 'Sign In' : 'Sign Up'}</h1>
+
+        {!isSignInForm && <input ref={name} className='mt-6 p-2 w-full bg-gray-100 rounded-md' type="text"  placeholder='Name' />}
+        <input ref={email} className='mt-6 p-2 w-full bg-gray-100 rounded-md' type="email" placeholder='Email ID' ></input>
+        <input ref={password} className='mt-6 p-2 w-full bg-gray-100 rounded-md' type="password" placeholder='Password' />
+        <p className='text-red-700 pt-2 m-1'>{errorMessage}</p>
+        <button className='w-full mt-8 font-bold text-white p-2 bg-red-600 rounded-md' onClick={handleSignIn}>{isSignInForm ? 'Sign In' : 'Sign Up'}</button>
+        <div onClick={toggleSignInForm} className='text-red-600 mt-4 ml-2 inline-block'>{isSignInForm ?
+          <p>New to Netflix? <b className='hover:underline cursor-pointer'>Sign up now.</b></p> :
+          <p>Alrady a User? <b className='hover:underline cursor-pointer'>Sign In.</b></p>}
+        </div>
+      </form>
+    </div>
+  )
+}
+
+export default Login
