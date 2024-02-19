@@ -3,15 +3,14 @@ import Header from './Header'
 import { validateFields } from '../utils/validate';
 import { createUserWithEmailAndPassword , signInWithEmailAndPassword, updateProfile} from "firebase/auth";
 import { auth } from '../utils/firebase'
-import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../utils/userSlice';
+import { NETFLIX_BACKGROUND, PHOTO_URL } from '../utils/constants';
 
 const Login = () => {
   const [isSignInForm, setIsSignInFrom] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const navigate = useNavigate();
   const name = useRef(null);
   const email = useRef(null);
   const password = useRef(null);
@@ -35,12 +34,11 @@ const Login = () => {
           const user = userCredential.user;
           console.log(user);
           updateProfile(user, {
-            displayName: name.current.value, photoURL: "https://wallpapers.com/images/high/netflix-profile-pictures-1000-x-1000-qo9h82134t9nv0j0.webp"
+            displayName: name.current.value, photoURL: PHOTO_URL
           }).then(() => {
             // Profile updated!
           const { uid, email, displayName, photoURL } = auth.currentUser;
           dispatch(addUser({ uid: uid, email: email, displayName: displayName, photoURL: photoURL }));
-            navigate('/browse');
           }).catch((error) => {
             // An error occurred
             // ...
@@ -65,7 +63,6 @@ const Login = () => {
           // Signed in 
           const user = userCredential.user;
           console.log("sign in ", user);
-          navigate('/browse');
           // ...
         })
         .catch((error) => {
@@ -81,7 +78,7 @@ const Login = () => {
     <div>
       <Header />
       <div>
-        <img className="absolute h-screen w-screen" src="https://assets.nflxext.com/ffe/siteui/vlv3/563192ea-ac0e-4906-a865-ba9899ffafad/6b2842d1-2339-4f08-84f6-148e9fcbe01b/IN-en-20231218-popsignuptwoweeks-perspective_alpha_website_medium.jpg" />
+        <img className="absolute h-screen w-screen" src={NETFLIX_BACKGROUND} />
       </div>
 
 
